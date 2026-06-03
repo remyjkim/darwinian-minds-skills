@@ -1,0 +1,32 @@
+{
+  "name": "darwinian-harness-skills",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Agent skills wrapping the drwn CLI for Claude Code, Codex, and related agent runtimes.",
+  "license": "MIT",
+  "files": [
+    "bundle.json",
+    "skills",
+    "cards",
+    "examples",
+    ".claude-plugin",
+    ".codex-plugin",
+    "README.md",
+    "MAINTAINERS.md",
+    "LICENSE",
+    "VERSION",
+    "scripts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remyjkim/darwinian-harness-skills.git"
+  },
+  "scripts": {
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"!node_modules/**\"",
+    "validate:skills": "node scripts/validate-skills.mjs",
+    "sync:cards": "node scripts/sync-card-skills.mjs"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.13.0"
+  }
+}

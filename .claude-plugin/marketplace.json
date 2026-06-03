@@ -1,0 +1,36 @@
+{
+  "name": "darwinian-harness-skills",
+  "owner": {
+    "name": "Remy Kim"
+  },
+  "metadata": {
+    "description": "Darwinian Harness agent skills marketplace.",
+    "version": "0.1.0",
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "darwinian",
+      "description": "Agent skills wrapping the drwn CLI: bootstrap, install, materialize, cards, library, defaults, diagnostics, support, repair, recommendations.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Remy Kim"
+      },
+      "homepage": "https://github.com/remyjkim/darwinian-harness-skills",
+      "repository": "https://github.com/remyjkim/darwinian-harness-skills",
+      "license": "MIT",
+      "keywords": [
+        "drwn",
+        "darwinian-harness",
+        "harness-cards"
+      ],
+      "category": "developer-tools",
+      "tags": [
+        "cli-wrapper",
+        "agent-driven",
+        "harness-cards"
+      ]
+    }
+  ]
+}
