@@ -19,7 +19,13 @@ versions deprecated.
 
 ## Procedure
 
-1. Disambiguate the user's intent:
+1. Verify the installed CLI before mutation:
+   1. Run `command -v drwn` and `drwn --version`.
+   2. Run `drwn status --json` when the task depends on current repo or store
+      state.
+   3. Prefer the installed `drwn` binary over repo-local dev invocations unless
+      the user is explicitly testing unreleased CLI changes.
+2. Disambiguate the user's intent:
    - Create a new source: `drwn card new`
    - Inspect an editable source: `drwn card source show --json`
    - Diagnose an editable source: `drwn card source doctor --json`
@@ -34,7 +40,7 @@ versions deprecated.
    - Compare versions: `drwn card diff --json`
    - Validate a ref: `drwn card validate --json`
    - Deprecate a version: `drwn card deprecate`
-2. For `card new`:
+3. For `card new`:
    1. Confirm the desired card name.
    2. If the name is unscoped, ask for an explicit `--scope=<scope>` or ask
       the user to provide a fully-qualified name. There is no dedicated
@@ -42,10 +48,10 @@ versions deprecated.
    3. On approval, run `drwn card new <name> [--scope <scope>] [--no-git]`.
    4. Run `drwn card source show <name> --json` and summarize the created
       source path and skeleton files.
-3. For source inspection, run `drwn card source show <name> --json`.
-4. For source diagnostics, run `drwn card source doctor [name] --json`.
+4. For source inspection, run `drwn card source show <name> --json`.
+5. For source diagnostics, run `drwn card source doctor [name] --json`.
    Treat `ok: false` as reportable source work, not a command failure.
-5. For `card new --from-project`:
+6. For `card new --from-project`:
    1. Run `drwn status --json` to confirm the source project state.
    2. Confirm the target card name and scope.
    3. Explain that `drwn` will copy active skill content and MCP definitions
@@ -53,40 +59,47 @@ versions deprecated.
    4. On approval, run
       `drwn card new <name> --from-project [projectPath] [--scope <scope>]`.
    5. Run `drwn card source doctor <name> --json`.
-6. For adding a bundled skill:
+7. For adding a bundled skill:
    1. Resolve whether the skill should come from the local library/repo by
       name or from an explicit directory with `--from <path>`.
    2. Run `drwn card source add-skill <card> <skill> [--from <path>] --dry-run --json`.
    3. Show the planned copy and manifest change.
    4. On approval, run the same command without `--dry-run`. Use `--replace`
       only after confirming overwrite intent.
-7. For removing a bundled skill:
+8. For removing a bundled skill:
    1. Run `drwn card source remove-skill <card> <skill> --dry-run --json`.
    2. Show whether files and the manifest entry will be removed.
    3. On approval, run the same command without `--dry-run`. Use
       `--keep-files` only when the user wants a manifest-only removal.
-8. For adding or removing MCP definitions, follow the same dry-run, summarize,
+9. For adding or removing MCP definitions, follow the same dry-run, summarize,
    approve, execute pattern with `drwn card source add-mcp` and
    `drwn card source remove-mcp`. Use `--from <json-file>` for explicit MCP
    definition files and `--replace` only after confirming overwrite intent.
-9. For source metadata, run `drwn card source set <card> ... --dry-run --json`
+10. For source metadata, run `drwn card source set <card> ... --dry-run --json`
    first, then apply after approval. Supported fields include description,
    version, license, harness min version, stability, last validated version,
-   and test status badge.
-10. For `card publish`:
+   and test status badge. `--last-validated-with` must be strict semver such
+   as `0.1.0`; do not include package names or prose in that field.
+11. For `card publish`:
     1. Run `drwn card source doctor <name> --json`.
     2. If `ok` is false, summarize the issues and stop before publishing.
     3. Run `drwn card source show <name> --json` and confirm the card name and
        version declared in the source manifest.
     4. On approval, run `drwn card publish <name>`.
     5. Verify the published ref with `drwn card validate <name>@<version> --json`.
-11. For `card show`, run `drwn card show <ref> --json`.
-12. For `card diff`, run `drwn card diff <before> <after> --json`.
-13. For `card deprecate`:
+    6. Run `drwn card show <name>@<version> --json` and summarize the
+       published name, version, integrity, bundled skill count, and server
+       count.
+12. For `card show`, run `drwn card show <ref> --json`.
+13. For `card diff`, run `drwn card diff <before> <after> --json`.
+14. For `card deprecate`:
     1. Confirm the exact version and message.
     2. Run `drwn card deprecate <ref> --message "<reason>"`.
-14. If the user asks to push, fetch, clone, or manage card remotes, stop after
-    publication and redirect to `share-harness-card`.
+15. If the user asks to push, fetch, clone, create a GitHub repository, or
+    manage card remotes, complete local publish and validation first, then
+    continue with `share-harness-card`. Local publish does not require GitHub
+    auth; remote creation and push require Git credentials with the necessary
+    write access.
 
 ## User-Ask Points
 
@@ -96,11 +109,12 @@ versions deprecated.
 4. Confirm `--replace`, `--keep-files`, and deprecation message choices
    explicitly.
 5. Confirm publish target and immutable version before `drwn card publish`.
-6. Confirm deprecation target and message before `drwn card deprecate`.
+6. Confirm handoff to `share-harness-card` before remote creation or push.
+7. Confirm deprecation target and message before `drwn card deprecate`.
 
 ## Wraps
 
-`drwn status --json`, `drwn card new`,
+`command -v drwn`, `drwn --version`, `drwn status --json`, `drwn card new`,
 `drwn card new --from-project`, `drwn card source list`,
 `drwn card source show --json`, `drwn card source doctor --json`,
 `drwn card source add-skill --dry-run --json`,
@@ -113,7 +127,8 @@ versions deprecated.
 
 ## Scope
 
-Card source and local immutable store.
+Card source and local immutable store. Git remotes, GitHub repository creation,
+push, fetch, and clone belong to `share-harness-card`.
 
 ## Failure Modes
 
@@ -127,6 +142,10 @@ Card source and local immutable store.
   verbatim.
 - Duplicate bundled skill or MCP server: rerun with `--replace` only after the
   user confirms overwrite intent.
+- Invalid `lastValidatedWith`: rerun `drwn card source set` with a strict semver
+  value such as `0.1.0`.
+- User asks to push or create a GitHub repository: finish local publish
+  validation, then use `share-harness-card`.
 - `DRWN_STORE_READONLY=1`: inspection and dry-run commands can still run, but
   real source mutations and publish commands must stop before writing.
 
