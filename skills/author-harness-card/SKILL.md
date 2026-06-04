@@ -42,12 +42,43 @@ versions deprecated.
    - Deprecate a version: `drwn card deprecate`
 3. For `card new`:
    1. Confirm the desired card name.
-   2. If the name is unscoped, ask for an explicit `--scope=<scope>` or ask
-      the user to provide a fully-qualified name. There is no dedicated
-      read-only CLI command for checking saved `authoring.scope`.
-   3. On approval, run `drwn card new <name> [--scope <scope>] [--no-git]`.
-   4. Run `drwn card source show <name> --json` and summarize the created
-      source path and skeleton files.
+   2. If the name is unscoped, let `drwn card new` resolve a default scope
+      itself rather than pre-probing on the agent side. The CLI probes
+      `gh api user -q .login`, then `git config --global github.user`, then
+      the local-part of `git config --global user.email`, and either prompts
+      the user in a TTY or (in the non-TTY contexts typical of agent
+      invocations) exits with a hint naming the detected handle so the
+      caller can rerun with `--scope @<handle>`.
+      1. Run `drwn card new <name> [--no-git]` and capture stderr.
+      2. If stderr contains a `Detected @<handle>` hint, use
+         `AskUserQuestion` to confirm the suggested handle (or let the user
+         supply a different `@<scope>`), then rerun with
+         `--scope @<handle> [--no-git]`. The `--scope` value must include
+         the `@` prefix (e.g. `@acme`); `drwn` rejects bare names.
+      3. If stderr says no handle could be derived from `gh` or `git config`,
+         use `AskUserQuestion` to ask the user for an explicit
+         `--scope=@<scope>`. Never propose `@me`: it collides across users
+         in shared marketplaces.
+      4. If `machine.authoring.scope` is already saved from a previous
+         `drwn card new`, the CLI uses it silently — no rerun is needed.
+   3. Run `drwn card source show @<scope>/<name> --json` and summarize the
+      created source path and skeleton files. Always pass the fully-qualified
+      name `@<scope>/<name>` — bare names are not resolved by `card source show`.
+   4. Use `AskUserQuestion` to ask how README content should be sourced.
+      Always offer all three options regardless of whether skills are bundled:
+      - **Auto-generate** — read each bundled skill's `SKILL.md` and derive
+        the value proposition, capabilities, and audience. Present the draft
+        for confirmation before writing. On a fresh `drwn card new` there
+        are no bundled skills yet; in that case inform the user and ask
+        them to add skills first via `drwn card source add-skill` or switch
+        to manual entry.
+      - **Enter manually** — collect value proposition, 2–3 capabilities,
+        audience, and license in a single `AskUserQuestion` prompt.
+      - **Skip for now** — write the README later after bundling skills.
+      Populate "What's included" from `bundledSkills` and `mcpServers` in
+      `drwn card source show --json`. Write the completed README to
+      `~/.agents/drwn/sources/<scope>/<name>/README.md` using the template
+      in `references/readme-template.md`.
 4. For source inspection, run `drwn card source show <name> --json`.
 5. For source diagnostics, run `drwn card source doctor [name] --json`.
    Treat `ok: false` as reportable source work, not a command failure.
@@ -103,14 +134,22 @@ versions deprecated.
 
 ## User-Ask Points
 
-1. Confirm card name and scope for `card new`.
-2. Confirm project capture before `card new --from-project`.
-3. Confirm every non-dry-run source mutation after reviewing the dry-run JSON.
-4. Confirm `--replace`, `--keep-files`, and deprecation message choices
-   explicitly.
-5. Confirm publish target and immutable version before `drwn card publish`.
-6. Confirm handoff to `share-harness-card` before remote creation or push.
-7. Confirm deprecation target and message before `drwn card deprecate`.
+Use the `AskUserQuestion` tool at every point below so the user can respond
+with clickable options rather than typing from scratch. Never ask multiple
+separate questions sequentially when they can be batched into one prompt.
+
+1. Confirm card name and scope for `card new`. When the CLI's first run
+   surfaces a `Detected @<handle>` hint, confirm the suggested handle (or
+   accept an override) before rerunning with `--scope @<handle>`.
+2. Choose README content source: auto-generate from bundled skills or enter
+   manually.
+3. Confirm auto-generated README draft before writing, or trigger manual entry.
+4. Confirm project capture before `card new --from-project`.
+5. Confirm every non-dry-run source mutation after reviewing the dry-run JSON.
+6. Confirm `--replace`, `--keep-files`, and deprecation message choices.
+7. Confirm publish target and immutable version before `drwn card publish`.
+8. Confirm handoff to `share-harness-card` before remote creation or push.
+9. Confirm deprecation target and message before `drwn card deprecate`.
 
 ## Wraps
 
@@ -132,8 +171,13 @@ push, fetch, and clone belong to `share-harness-card`.
 
 ## Failure Modes
 
-- Unscoped name without scope: ask again for `--scope` or a fully-qualified
-  name.
+- Unscoped name without scope: read the CLI's stderr from the first
+  `drwn card new` run. If it contains `Detected @<handle>`, confirm with the
+  user and rerun with `--scope @<handle>`. If it says no handle could be
+  derived, ask the user for an explicit `--scope=@<scope>`. The scope value
+  passed to `drwn` must include the `@` prefix (e.g. `--scope @acme`); bare
+  names are rejected. Never propose `@me` — it collides across users in
+  shared marketplaces.
 - Existing version on publish: use `drwn card source set <name> --version ...`
   to bump the source version first.
 - Project capture finds unresolved effective state: repair or materialize the
