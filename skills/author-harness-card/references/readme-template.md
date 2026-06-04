@@ -13,10 +13,12 @@
 
 ## Installation
 
+> Requires the [drwn CLI](https://darwiniantools.com).
+
 Clone the card to your local store:
 
 ```sh
-drwn card clone github:<owner>/<name>#v<version>
+drwn card clone github:<owner>/<name>@latest
 ```
 
 Initialize a project (if you haven't already):
@@ -28,7 +30,7 @@ drwn init
 Apply to your project:
 
 ```sh
-drwn card apply <scope>/<name>@<version>
+drwn card apply <scope>/<name>@latest
 ```
 
 ## What's included
