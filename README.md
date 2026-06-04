@@ -24,7 +24,7 @@ flow.
 | `repair-harness` | Guide safe repair of drift and legacy layout | project + machine | high |
 | `manage-defaults` | Machine-wide defaults and curated publication layer | machine | high |
 | `recommend-harness` | Suggest cards, extensions, skills, MCPs without mutation | project | none |
-| `share-harness-card` | Push, fetch, clone, and manage Git remotes for cards | store + remote | medium |
+| `share-harness-card` | Push, fetch, clone, manage remotes, and publish cards to catalogs | store + remote + catalog | medium |
 | `support-harness` | Export support artifacts and run store checks | project + machine | medium |
 | `organize-workspace` | Future cross-project organizer stub | workspace | deferred |
 

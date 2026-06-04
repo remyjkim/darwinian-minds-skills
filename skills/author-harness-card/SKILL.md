@@ -126,11 +126,11 @@ versions deprecated.
 14. For `card deprecate`:
     1. Confirm the exact version and message.
     2. Run `drwn card deprecate <ref> --message "<reason>"`.
-15. If the user asks to push, fetch, clone, create a GitHub repository, or
-    manage card remotes, complete local publish and validation first, then
-    continue with `share-harness-card`. Local publish does not require GitHub
-    auth; remote creation and push require Git credentials with the necessary
-    write access.
+15. If the user asks to push, fetch, clone, create a GitHub repository, manage
+    card remotes, or publish the card to a catalog, complete local publish and
+    validation first, then continue with `share-harness-card`. Local publish
+    does not require GitHub auth; remote creation, push, and direct catalog
+    publication require credentials with the necessary write access.
 
 ## User-Ask Points
 
@@ -167,7 +167,7 @@ separate questions sequentially when they can be batched into one prompt.
 ## Scope
 
 Card source and local immutable store. Git remotes, GitHub repository creation,
-push, fetch, and clone belong to `share-harness-card`.
+push, fetch, clone, and catalog publication belong to `share-harness-card`.
 
 ## Failure Modes
 
@@ -188,8 +188,8 @@ push, fetch, and clone belong to `share-harness-card`.
   user confirms overwrite intent.
 - Invalid `lastValidatedWith`: rerun `drwn card source set` with a strict semver
   value such as `0.1.0`.
-- User asks to push or create a GitHub repository: finish local publish
-  validation, then use `share-harness-card`.
+- User asks to push, publish to a catalog, or create a GitHub repository: finish
+  local publish validation, then use `share-harness-card`.
 - `DRWN_STORE_READONLY=1`: inspection and dry-run commands can still run, but
   real source mutations and publish commands must stop before writing.
 
