@@ -42,11 +42,23 @@ versions deprecated.
    - Deprecate a version: `drwn card deprecate`
 3. For `card new`:
    1. Confirm the desired card name.
-   2. If the name is unscoped, ask for an explicit `--scope=<scope>` or ask
-      the user to provide a fully-qualified name. There is no dedicated
-      read-only CLI command for checking saved `authoring.scope`.
-   3. On approval, run `drwn card new <name> [--scope <scope>] [--no-git]`.
-   4. Run `drwn card source show <name> --json` and summarize the created
+   2. If the name is unscoped, prefer letting `drwn card new` resolve the
+      scope itself: when no `--scope` is given and `authoring.scope` is not
+      yet saved in `machine.json`, the CLI probes `gh api user -q .login`,
+      then `git config --global github.user`, then the local-part of
+      `user.email`, and either (in a TTY) prompts the user to confirm the
+      derived `@<handle>` scope or (in a non-TTY) exits with an error whose
+      message includes the detected handle so the caller can rerun with
+      `--scope @<handle>`. There is no dedicated read-only CLI command for
+      checking saved `authoring.scope`.
+   3. Only ask the user for `--scope` directly when there is a concrete
+      reason the auto-derived handle would be wrong (shared machine, multiple
+      GitHub identities, intentionally publishing under an org or team scope
+      such as `@curation-labs`).
+   4. On approval, run `drwn card new <name> [--scope <scope>] [--no-git]`.
+      If the CLI prints an auto-derive prompt or error, surface it verbatim
+      and let the user accept the suggestion or supply an override.
+   5. Run `drwn card source show <name> --json` and summarize the created
       source path and skeleton files.
 4. For source inspection, run `drwn card source show <name> --json`.
 5. For source diagnostics, run `drwn card source doctor [name] --json`.
@@ -132,7 +144,10 @@ push, fetch, and clone belong to `share-harness-card`.
 
 ## Failure Modes
 
-- Unscoped name without scope: ask again for `--scope` or a fully-qualified
+- Unscoped name without scope: in a TTY, accept the CLI's auto-derived
+  suggestion or rerun with an explicit `--scope`; in non-TTY, surface the
+  CLI's hint (which names the detected handle when `gh` or `git config`
+  produced one) and rerun with `--scope @<handle>` or a fully-qualified
   name.
 - Existing version on publish: use `drwn card source set <name> --version ...`
   to bump the source version first.
