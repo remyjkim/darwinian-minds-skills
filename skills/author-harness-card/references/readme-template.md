@@ -19,6 +19,12 @@ Clone the card to your local store:
 drwn card clone github:<owner>/<name>#v<version>
 ```
 
+Initialize a project (if you haven't already):
+
+```sh
+drwn init
+```
+
 Apply to your project:
 
 ```sh
