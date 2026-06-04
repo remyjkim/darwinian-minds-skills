@@ -56,19 +56,28 @@ versions deprecated.
    4. Run `drwn card source show @<login>/<name> --json` and summarize the
       created source path and skeleton files. Always pass the fully-qualified
       name `@<scope>/<name>` — bare names are not resolved by `card source show`.
-   5. Before generating the README, collect the following from the user if not
-      already known from context. Ask for all missing fields in a single
-      message rather than one at a time:
-      - One-sentence value proposition (what does this card do?)
-      - 2–3 capability bullet points (what it does)
-      - Who it is recommended for (audience / context)
-      - License (e.g. MIT, Apache-2.0, or "Proprietary")
-      Populate the "What's included" table directly from the `bundledSkills`
-      and `mcpServers` arrays returned by `drwn card source show --json`; omit
-      the placeholder row if there is at least one real entry.
+   5. Before generating the README, use `AskUserQuestion` to ask how the
+      content should be sourced — present two options:
+      - **Auto-generate** — read each bundled skill's `SKILL.md` (from
+        `~/.agents/drwn/sources/<scope>/<name>/skills/<skill>/SKILL.md`) and
+        derive the value proposition, capabilities, and audience from the
+        skill descriptions and purpose sections. Present the drafted content
+        to the user for confirmation or editing before writing the file.
+        If no skills are bundled yet, fall back to asking the user directly.
+      - **Enter manually** — use `AskUserQuestion` to collect the following
+        fields in a single prompt (never ask one field at a time):
+        - One-sentence value proposition
+        - 2–3 capability bullet points
+        - Who it is recommended for
+        - License (offer common choices: MIT, Apache-2.0, Proprietary, Other)
+      Populate the "What's included" table from the `bundledSkills` and
+      `mcpServers` arrays in `drwn card source show --json`; omit the
+      placeholder row when at least one real entry exists.
       Then generate a `README.md` in the created source folder
       (`~/.agents/drwn/sources/<scope>/<name>/README.md`) using the template
-      below with all fields filled in.
+      below with all fields filled in. Use `AskUserQuestion` at every
+      decision point that requires user input so the user can respond with
+      clickable options rather than typing from scratch.
 
       ````markdown
       # <name>
@@ -178,16 +187,22 @@ versions deprecated.
 
 ## User-Ask Points
 
+Use the `AskUserQuestion` tool at every point below so the user can respond
+with clickable options rather than typing from scratch. Never ask multiple
+separate questions sequentially when they can be batched into one prompt.
+
 1. Confirm card name and scope for `card new`; when a GitHub username is
    resolved automatically, confirm the proposed `@<login>/<name>` scope before
    running `drwn card new`.
-2. Confirm project capture before `card new --from-project`.
-3. Confirm every non-dry-run source mutation after reviewing the dry-run JSON.
-4. Confirm `--replace`, `--keep-files`, and deprecation message choices
-   explicitly.
-5. Confirm publish target and immutable version before `drwn card publish`.
-6. Confirm handoff to `share-harness-card` before remote creation or push.
-7. Confirm deprecation target and message before `drwn card deprecate`.
+2. Choose README content source: auto-generate from bundled skills or enter
+   manually.
+3. Confirm auto-generated README draft before writing, or trigger manual entry.
+4. Confirm project capture before `card new --from-project`.
+5. Confirm every non-dry-run source mutation after reviewing the dry-run JSON.
+6. Confirm `--replace`, `--keep-files`, and deprecation message choices.
+7. Confirm publish target and immutable version before `drwn card publish`.
+8. Confirm handoff to `share-harness-card` before remote creation or push.
+9. Confirm deprecation target and message before `drwn card deprecate`.
 
 ## Wraps
 
