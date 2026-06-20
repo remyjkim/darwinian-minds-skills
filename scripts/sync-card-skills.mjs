@@ -24,6 +24,7 @@ const cardMaps = [
       "recommend-harness",
       "share-harness-card",
       "support-harness",
+      "import-mcp-from-claude",
     ],
   },
   {

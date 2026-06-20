@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "bundleName": "darwinian-harness-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Darwinian Harness Skills",
   "description": "Agent skills for operating Darwinian Harness through the drwn CLI.",
   "skills": [
@@ -64,6 +64,11 @@
       "name": "support-harness",
       "scope": "shared",
       "path": "skills/support-harness"
+    },
+    {
+      "name": "import-mcp-from-claude",
+      "scope": "shared",
+      "path": "skills/import-mcp-from-claude"
     },
     {
       "name": "organize-workspace",

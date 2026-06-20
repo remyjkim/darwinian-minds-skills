@@ -1,7 +1,7 @@
 {
   "name": "darwinian-harness-skills",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agent skills wrapping the drwn CLI for Claude Code, Codex, and related agent runtimes.",
   "license": "MIT",
   "files": [
