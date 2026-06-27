@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "bundleName": "darwinian-harness-skills",
-  "version": "0.2.0",
-  "displayName": "Darwinian Harness Skills",
-  "description": "Agent skills for operating Darwinian Harness through the drwn CLI.",
+  "bundleName": "darwinian-minds-skills",
+  "version": "0.3.0",
+  "displayName": "Darwinian Minds Skills",
+  "description": "Agent skills and mind-card content for operating Darwinian Minds through the drwn CLI.",
   "skills": [
     {
       "name": "bootstrap-project",
