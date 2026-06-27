@@ -76,6 +76,21 @@
       "path": "skills/import-mcp-from-claude"
     },
     {
+      "name": "manage-active-mind-stack",
+      "scope": "shared",
+      "path": "skills/manage-active-mind-stack"
+    },
+    {
+      "name": "author-mind-content",
+      "scope": "shared",
+      "path": "skills/author-mind-content"
+    },
+    {
+      "name": "audit-mind-visibility",
+      "scope": "shared",
+      "path": "skills/audit-mind-visibility"
+    },
+    {
       "name": "organize-workspace",
       "scope": "experimental",
       "path": "skills/organize-workspace"

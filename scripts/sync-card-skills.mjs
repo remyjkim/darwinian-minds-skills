@@ -32,6 +32,14 @@ const cardMaps = [
     targetDir: join(rootDir, "cards", "workspace-experimental", "skills"),
     skills: ["organize-workspace"],
   },
+  {
+    targetDir: join(rootDir, "cards", "base-mind", "skills"),
+    skills: [
+      "manage-active-mind-stack",
+      "author-mind-content",
+      "audit-mind-visibility",
+    ],
+  },
 ];
 
 for (const { targetDir, skills } of cardMaps) {
