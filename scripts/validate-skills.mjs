@@ -68,14 +68,23 @@ function listSkillDirs(dir) {
     .sort();
 }
 
-function parseSyncScriptStableSkills() {
+function parseSyncScriptCardSkills(cardName) {
   const script = readFileSync(join("scripts", "sync-card-skills.mjs"), "utf8");
-  const match = script.match(/targetDir:\s*join\(rootDir,\s*"cards",\s*"harness-skills",\s*"skills"\),\s*skills:\s*\[([\s\S]*?)\]/);
+  const pattern = new RegExp(
+    String.raw`targetDir:\s*join\(rootDir,\s*"cards",\s*"${cardName}",\s*"skills"\),\s*skills:\s*\[([\s\S]*?)\]`,
+  );
+  const match = script.match(pattern);
   if (!match) {
     return null;
   }
   return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
 }
+
+const BASE_MIND_SKILLS = [
+  "manage-active-mind-stack",
+  "author-mind-content",
+  "audit-mind-visibility",
+];
 
 function diffSets(expected, actual) {
   return {
@@ -117,7 +126,9 @@ function validateSkillInventory(skillNames) {
 
   const stableCard = readJson(join("cards", "harness-skills", "card.json"));
   const stableNames = stableCard.skills?.include ?? [];
-  const expectedStableNames = skillNames.filter((name) => name !== "organize-workspace");
+  const expectedStableNames = skillNames.filter(
+    (name) => name !== "organize-workspace" && !BASE_MIND_SKILLS.includes(name),
+  );
   const stableDiff = diffSets(expectedStableNames, stableNames);
   for (const name of stableDiff.missing) {
     errors.push(`cards/harness-skills/card.json: missing skill "${name}"`);
@@ -134,7 +145,7 @@ function validateSkillInventory(skillNames) {
     errors.push(`cards/harness-skills/skills: unexpected bundled skill "${name}"`);
   }
 
-  const scriptNames = parseSyncScriptStableSkills();
+  const scriptNames = parseSyncScriptCardSkills("harness-skills");
   if (!scriptNames) {
     errors.push("scripts/sync-card-skills.mjs: could not find harness-skills map");
   } else {
@@ -155,6 +166,37 @@ function validateSkillInventory(skillNames) {
   const experimentalCardDirs = listSkillDirs(join("cards", "workspace-experimental", "skills"));
   if (experimentalCardDirs.length !== 1 || experimentalCardDirs[0] !== "organize-workspace") {
     errors.push("cards/workspace-experimental/skills: expected only organize-workspace");
+  }
+
+  const expectedBaseMindNames = BASE_MIND_SKILLS.filter((name) => skillNames.includes(name));
+  const baseMindCard = readJson(join("cards", "base-mind", "card.json"));
+  const baseMindNames = baseMindCard.skills?.include ?? [];
+  const baseMindDiff = diffSets(expectedBaseMindNames, baseMindNames);
+  for (const name of baseMindDiff.missing) {
+    errors.push(`cards/base-mind/card.json: missing skill "${name}"`);
+  }
+  for (const name of baseMindDiff.extra) {
+    errors.push(`cards/base-mind/card.json: references unexpected skill "${name}"`);
+  }
+  const baseMindCardDirs = listSkillDirs(join("cards", "base-mind", "skills"));
+  const baseMindCardDirDiff = diffSets(expectedBaseMindNames, baseMindCardDirs);
+  for (const name of baseMindCardDirDiff.missing) {
+    errors.push(`cards/base-mind/skills: missing bundled skill "${name}"`);
+  }
+  for (const name of baseMindCardDirDiff.extra) {
+    errors.push(`cards/base-mind/skills: unexpected bundled skill "${name}"`);
+  }
+  const baseMindScriptNames = parseSyncScriptCardSkills("base-mind");
+  if (!baseMindScriptNames) {
+    errors.push("scripts/sync-card-skills.mjs: could not find base-mind map");
+  } else {
+    const baseMindScriptDiff = diffSets(expectedBaseMindNames, baseMindScriptNames);
+    for (const name of baseMindScriptDiff.missing) {
+      errors.push(`scripts/sync-card-skills.mjs: missing base-mind skill "${name}"`);
+    }
+    for (const name of baseMindScriptDiff.extra) {
+      errors.push(`scripts/sync-card-skills.mjs: references unexpected base-mind skill "${name}"`);
+    }
   }
 
   return errors;
