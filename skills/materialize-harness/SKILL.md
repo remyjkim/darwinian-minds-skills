@@ -10,7 +10,8 @@ description: "Use when activating project-local skills or MCP servers, or writin
 Materialize effective Darwinian Harness state into downstream agent tools. Use
 this for routine `drwn write` work, targeted writes, MCP-only writes,
 skills-only writes, and project-local activation of individual skills or MCP
-servers before writing.
+servers before writing. Use `--root` or `--user` when the requested write is
+explicitly machine-default/user-scope instead of the current project.
 
 Requires `drwn` on PATH. Scope is project when a project config is present;
 otherwise scope is machine. Blast radius is medium because this skill writes
@@ -32,6 +33,8 @@ machine-level downstream directories.
    - Write one target: `drwn write --target=<target>`
    - Write only skills: `drwn write --skills-only`
    - Write only MCP: `drwn write --mcp-only` or `drwn mcp write`
+   - Write machine defaults to user-scope config: `drwn write --root`
+   - Fail when card hooks lack consent: `drwn write --strict-hooks`
 5. For project-local skill activation:
    1. Preview with `drwn add skill <query-or-name> --dry-run --json`.
    2. Use `--library` if the user wants local inventory only.
@@ -50,8 +53,14 @@ machine-level downstream directories.
    - `drwn write --target=<target> --dry-run --json` for one target
    - `drwn write --skills-only --dry-run --json` for skills
    - `drwn mcp write --dry-run --json` for MCP-only writes
-8. Show planned changes, warnings, target scope, and whether the write is
-   project-scope or machine-scope.
+   - `drwn write --root --dry-run --json` for machine-default user-scope
+     writes
+   - add `--strict-hooks` when the user wants missing card hook consent to
+     fail the preview instead of skipping hooks
+8. Show planned changes, warnings, target scope, whether the write is
+   project-scope or machine-scope, and any `optionalMcpReport` entries.
+   Optional card MCP definitions require a separate project opt-in with
+   `drwn add mcp <name>` before they are materialized.
 9. If the dry run has no changes, say that generated state is already current
    and do not run a real write.
 10. On approval, run the corresponding real write command without `--dry-run`.
@@ -64,8 +73,11 @@ machine-level downstream directories.
 1. Confirm any project config mutation from `drwn add skill` or `drwn add mcp`.
 2. Confirm catalog-backed installation or catalog-backed MCP acceptance when
    `--yes` is needed.
-3. Confirm downstream write after reviewing the dry-run changes.
-4. Confirm `--force` separately with an explicit drift-overwrite warning.
+3. Confirm `--root` or `--user` before writing machine defaults to user-scope
+   downstream tool config.
+4. Confirm `--strict-hooks` behavior when hook consent warnings are present.
+5. Confirm downstream write after reviewing the dry-run changes and warnings.
+6. Confirm `--force` separately with an explicit drift-overwrite warning.
 
 ## Wraps
 
@@ -73,8 +85,11 @@ machine-level downstream directories.
 `drwn add skill --dry-run --json`, `drwn add skill`,
 `drwn add mcp --dry-run --json`, `drwn add mcp`,
 `drwn write --dry-run --json`, `drwn write`,
+`drwn write --root --dry-run --json`, `drwn write --root`,
+`drwn write --user --dry-run --json`, `drwn write --user`,
 `drwn write --target`, `drwn write --skills-only`,
-`drwn write --mcp-only`, `drwn write --force`,
+`drwn write --mcp-only`, `drwn write --strict-hooks`,
+`drwn write --strict-hooks --dry-run --json`, `drwn write --force`,
 `drwn mcp write --dry-run --json`, `drwn mcp write`
 
 ## Scope
@@ -91,6 +106,11 @@ project.
   `recommend-harness`.
 - Unresolved skill or MCP after activation: surface diagnostics and stop before
   writing.
+- Card hook consent missing or out of range: default writes skip hooks with a
+  warning; `--strict-hooks` fails and should be resolved with
+  `apply-harness-card` before writing.
+- Optional card MCP definitions skipped: explain the required
+  `drwn add mcp <name>` opt-in, then rerun the write preview if activated.
 - User-owned drift blocks write: explain the conflict and require separate
   approval before `--force`.
 

@@ -9,7 +9,8 @@ description: "Use when repairing Darwinian Harness drift, missing generated file
 
 Guide safe repair of harness state after `inspect-harness` or a user report
 finds drift. Use diagnostics to classify the issue, preview the fix, and only
-then mutate.
+then mutate. Treat hook consent and optional card MCP activation as explicit
+user decisions, not automatic repairs.
 
 Requires `drwn` on PATH. Scope is primarily project, but this skill also
 touches the machine-wide store during `drwn store migrate`. Blast radius is
@@ -24,6 +25,8 @@ high.
    - Legacy layout detected
    - Broken symlinks, stale generated files, or MCP drift
    - Outdated card lock
+   - Card hook consent missing or outside the locked version range
+   - Optional card MCP definitions skipped because the project has not opted in
    - Extension-specific health failure
 5. For legacy layout:
    1. Explain what `drwn store migrate` will do.
@@ -31,35 +34,56 @@ high.
    3. Run `drwn store migrate` or `drwn store migrate --yes` when appropriate.
 6. For downstream drift:
    1. Run `drwn write --dry-run --json`.
-   2. Show `changes`.
+   2. Show `changes`, `warnings`, and `optionalMcpReport`.
    3. On approval, run `drwn write`.
    4. If the fix requires overwriting drwn-owned drift, explain `--force`
       explicitly and ask again before running `drwn write --force`.
-7. For outdated card locks:
+7. For missing or out-of-range hook consent:
+   1. Run `drwn card status --explain` and `drwn write --dry-run --json`.
+   2. Inspect the card with `drwn card show <card>@<version> --json` and
+      summarize the declared `hookPolicies`.
+   3. Ask for explicit consent before running
+      `drwn card trust <card> --hooks [--range <range>]`.
+   4. Rerun `drwn write --strict-hooks --dry-run --json` to confirm hook
+      materialization no longer fails closed.
+   5. Continue through the normal write approval path.
+8. For optional card MCP definitions skipped by the write preview:
+   1. Explain that the card made the MCP definition available, but the project
+      still needs to opt in.
+   2. Preview activation with `drwn add mcp <name> --dry-run --json`.
+   3. On approval, run `drwn add mcp <name>`.
+   4. Rerun `drwn write --dry-run --json` and continue through the write path.
+9. For outdated card locks:
    1. Run `drwn card outdated --json`.
    2. On approval, run `drwn card update`.
    3. Then preview with `drwn write --dry-run --json` and continue through the
       write path.
-8. For extension failures:
-   1. Run `drwn extensions doctor --json` and `drwn extensions status <name> --json`.
-   2. If a setup re-run is required, preview and explain it first.
-   3. On approval, run `drwn extensions setup <name>`.
-   4. Then preview downstream changes with `drwn write --dry-run --json`.
-9. Re-run the relevant read-only commands to confirm the repair.
+10. For extension failures:
+    1. Run `drwn extensions doctor --json` and
+       `drwn extensions status <name> --json`.
+    2. If a setup re-run is required, preview and explain it first.
+    3. On approval, run `drwn extensions setup <name>`.
+    4. Then preview downstream changes with `drwn write --dry-run --json`.
+11. Re-run the relevant read-only commands to confirm the repair.
 
 ## User-Ask Points
 
 1. Confirm store migration.
 2. Confirm `drwn write`.
 3. Confirm `drwn write --force` with an explicit overwrite warning.
-4. Confirm `drwn card update`.
-5. Confirm extension setup re-run when external tool setup is involved.
+4. Confirm hook consent before `drwn card trust <card> --hooks`.
+5. Confirm optional MCP activation before `drwn add mcp <name>`.
+6. Confirm `drwn card update`.
+7. Confirm extension setup re-run when external tool setup is involved.
 
 ## Wraps
 
 `drwn doctor --json`, `drwn card status --explain`, `drwn store status --json`,
 `drwn store migrate`, `drwn write --dry-run --json`, `drwn write`,
-`drwn write --force`, `drwn card outdated --json`, `drwn card update`,
+`drwn write --strict-hooks --dry-run --json`, `drwn write --force`,
+`drwn card show --json`, `drwn card trust --hooks`,
+`drwn add mcp --dry-run --json`, `drwn add mcp`,
+`drwn card outdated --json`, `drwn card update`,
 `drwn extensions doctor --json`, `drwn extensions status --json`,
 `drwn extensions setup`
 
@@ -73,6 +97,9 @@ Project first, with machine-store mutation during migration.
 - User declines migration or write: stop cleanly with no further mutation.
 - `drwn write` fails on unresolved included skills: surface the missing name and
   do not try to bypass it with `--force`.
+- Hook consent declined: leave hooks skipped and do not run `--strict-hooks`.
+- Optional MCP activation declined: leave the MCP skipped and do not treat it as
+  drift.
 - Extension setup failure: surface stderr and stop.
 
 ## Related Skills

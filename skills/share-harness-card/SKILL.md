@@ -32,7 +32,10 @@ or fetch remote Git refs, and may update catalog manifests.
    - Push a local card: `drwn card push <name> [--remote <remote>]`
    - Publish an installable card to a catalog:
      `drwn card catalog publish <card-ref> --catalog <target> --mode <local|direct>`
+   - Validate a catalog before or after publication: `drwn catalog validate`
    - Fetch a local card: `drwn card fetch <name> [--remote <remote>]`
+   - Check project card updates from remotes:
+     `drwn card outdated --fetch --json`
    - Clone a Git-origin card: `drwn card clone <git-ref> --json`
 4. For a local card operation, inspect the card first with
    `drwn card show <name> --json` or `drwn card list --json`.
@@ -88,15 +91,22 @@ or fetch remote Git refs, and may update catalog manifests.
    7. For public catalogs, prefer an explicit HTTPS install URL with
       `--url 'git+https://github.com/<owner>/<repo>.git#v<version>'` instead of
       letting `drwn` infer an SSH URL from the card remote.
-   8. Run `drwn card catalog publish <card-ref> --catalog <target> --mode <local|direct> [--url <install-url>] [--tag <tag>] --dry-run --json`.
-   9. Summarize the planned catalog scope, entry name, install URL, description,
+   8. When the catalog target is a local path or public URL, run
+      `drwn catalog validate <target> --deep --json` before publishing.
+      Use `--allow-untrusted-source` only when the user explicitly accepts
+      validating entries whose source URLs are not in the catalog trust roots.
+   9. Run the dry-run catalog publish command with the confirmed card ref,
+      catalog target, mode, install URL, tags, and `--json`.
+   10. Summarize the planned catalog scope, entry name, install URL, description,
       tags, action, warnings, and whether `--replace` is required.
-   10. On approval, run the same command without `--dry-run`. Use `--replace` only
+   11. On approval, run the same command without `--dry-run`. Use `--replace` only
       after the user explicitly confirms replacing an existing catalog entry.
-   11. Verify with `drwn library catalog refresh <scope>` and
+   12. Verify with `drwn catalog validate <target> --deep --json` when the
+       updated catalog path or URL is available.
+   13. Verify with `drwn library catalog refresh <scope>` and
        `drwn search card <entry-name> --scope <scope> --json` when a scope is
        known.
-   12. For a public catalog smoke test, use an isolated temporary `AGENTS_DIR` to
+   14. For a public catalog smoke test, use an isolated temporary `AGENTS_DIR` to
        run `drwn library catalog add <catalog-url>`, search the entry, and
        `drwn card clone <entry-url> --json`.
 9. For fetch:
@@ -105,14 +115,20 @@ or fetch remote Git refs, and may update catalog manifests.
       card to any project.
    3. On approval, run `drwn card fetch <name> [--remote <remote>]`.
    4. Verify with `drwn card show <name> --json` or `drwn card list --json`.
-10. For clone:
+10. For project update checks from remotes:
+    1. Run `drwn card outdated --fetch --json` from the consumer project.
+    2. Explain that `--fetch` mutates local card repo refs but does not apply
+       updates to the project.
+    3. If the user wants to update the project after review, stop and redirect
+       to `apply-harness-card`.
+11. For clone:
     1. Confirm the exact `git+`, `github:`, or `gitlab:` card ref.
        Git refs require an explicit selector such as `#v0.1.0` or `@^0.1.0`.
     2. Explain that clone resolves the Git ref, imports the card into the local
        store, extracts the selected tree, and records the origin URL.
     3. On approval, run `drwn card clone <git-ref> --json`.
     4. Verify the returned or requested ref with `drwn card validate <ref> --json`.
-11. If the user wants to apply the shared card to the current project, stop and
+12. If the user wants to apply the shared card to the current project, stop and
    redirect to `apply-harness-card`.
 
 ## User-Ask Points
@@ -132,10 +148,13 @@ or fetch remote Git refs, and may update catalog manifests.
 `drwn card show --json`, `drwn card remote list --json`,
 `drwn card remote add`, `drwn card remote set`, `drwn card remote remove`,
 `drwn card push`, `drwn card catalog publish --dry-run --json`,
-`drwn card catalog publish`, `drwn library catalog refresh`,
+`drwn card catalog publish`, `drwn catalog validate --deep --json`,
+`drwn catalog validate --deep --json --allow-untrusted-source`,
+`drwn library catalog refresh`,
 `drwn search card --json`, `drwn card fetch`, `drwn card clone --json`,
-`drwn card validate --json`, `drwn library catalog add`, `gh auth status`,
-`gh api user --jq .login`, `gh repo view`, `gh repo create`, `git ls-remote`
+`drwn card outdated --fetch --json`, `drwn card validate --json`,
+`drwn library catalog add`, `gh auth status`, `gh api user --jq .login`,
+`gh repo view`, `gh repo create`, `git ls-remote`
 
 ## Scope
 
@@ -153,6 +172,8 @@ published entry.
 - Inferred catalog URL is SSH but the catalog is public: prefer an explicit
   HTTPS `--url` so consumers without matching SSH credentials can install it.
 - Catalog duplicate entry: require explicit `--replace` approval.
+- Catalog validation fails: surface the failing entry and fix the catalog or
+  card metadata before publish or handoff.
 - Direct catalog publish reports a dirty catalog worktree: surface the `drwn`
   error and stop.
 - Catalog entry scope differs from the card manifest scope: explain whether the

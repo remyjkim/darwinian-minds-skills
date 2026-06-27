@@ -58,10 +58,112 @@ function validateSkill(dir, skillName) {
   return errors;
 }
 
+function readJson(path) {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function listSkillDirs(dir) {
+  return readdirSync(dir)
+    .filter((entry) => statSync(join(dir, entry)).isDirectory())
+    .sort();
+}
+
+function parseSyncScriptStableSkills() {
+  const script = readFileSync(join("scripts", "sync-card-skills.mjs"), "utf8");
+  const match = script.match(/targetDir:\s*join\(rootDir,\s*"cards",\s*"harness-skills",\s*"skills"\),\s*skills:\s*\[([\s\S]*?)\]/);
+  if (!match) {
+    return null;
+  }
+  return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
+}
+
+function diffSets(expected, actual) {
+  return {
+    missing: expected.filter((value) => !actual.includes(value)),
+    extra: actual.filter((value) => !expected.includes(value)),
+  };
+}
+
+function validateSkillInventory(skillNames) {
+  const errors = [];
+  const bundle = readJson("bundle.json");
+  const bundleSkills = bundle.skills ?? [];
+  const bundleNames = bundleSkills.map((skill) => skill.name);
+  const bundleByName = new Map();
+  for (const skill of bundleSkills) {
+    if (bundleByName.has(skill.name)) {
+      errors.push(`bundle.json: duplicate skill "${skill.name}"`);
+      continue;
+    }
+    bundleByName.set(skill.name, skill);
+  }
+  const bundleDiff = diffSets(skillNames, bundleNames);
+  for (const name of bundleDiff.missing) {
+    errors.push(`bundle.json: missing skill "${name}"`);
+  }
+  for (const name of bundleDiff.extra) {
+    errors.push(`bundle.json: references unknown skill "${name}"`);
+  }
+  for (const name of skillNames) {
+    const entry = bundleByName.get(name);
+    if (!entry) {
+      continue;
+    }
+    const expectedPath = `skills/${name}`;
+    if (entry.path !== expectedPath) {
+      errors.push(`bundle.json: skill "${name}" path is "${entry.path}", expected "${expectedPath}"`);
+    }
+  }
+
+  const stableCard = readJson(join("cards", "harness-skills", "card.json"));
+  const stableNames = stableCard.skills?.include ?? [];
+  const expectedStableNames = skillNames.filter((name) => name !== "organize-workspace");
+  const stableDiff = diffSets(expectedStableNames, stableNames);
+  for (const name of stableDiff.missing) {
+    errors.push(`cards/harness-skills/card.json: missing skill "${name}"`);
+  }
+  for (const name of stableDiff.extra) {
+    errors.push(`cards/harness-skills/card.json: references unexpected skill "${name}"`);
+  }
+  const stableCardDirs = listSkillDirs(join("cards", "harness-skills", "skills"));
+  const stableCardDirDiff = diffSets(expectedStableNames, stableCardDirs);
+  for (const name of stableCardDirDiff.missing) {
+    errors.push(`cards/harness-skills/skills: missing bundled skill "${name}"`);
+  }
+  for (const name of stableCardDirDiff.extra) {
+    errors.push(`cards/harness-skills/skills: unexpected bundled skill "${name}"`);
+  }
+
+  const scriptNames = parseSyncScriptStableSkills();
+  if (!scriptNames) {
+    errors.push("scripts/sync-card-skills.mjs: could not find harness-skills map");
+  } else {
+    const scriptDiff = diffSets(expectedStableNames, scriptNames);
+    for (const name of scriptDiff.missing) {
+      errors.push(`scripts/sync-card-skills.mjs: missing stable skill "${name}"`);
+    }
+    for (const name of scriptDiff.extra) {
+      errors.push(`scripts/sync-card-skills.mjs: references unexpected stable skill "${name}"`);
+    }
+  }
+
+  const experimentalCard = readJson(join("cards", "workspace-experimental", "card.json"));
+  const experimentalNames = experimentalCard.skills?.include ?? [];
+  if (experimentalNames.length !== 1 || experimentalNames[0] !== "organize-workspace") {
+    errors.push("cards/workspace-experimental/card.json: expected only organize-workspace");
+  }
+  const experimentalCardDirs = listSkillDirs(join("cards", "workspace-experimental", "skills"));
+  if (experimentalCardDirs.length !== 1 || experimentalCardDirs[0] !== "organize-workspace") {
+    errors.push("cards/workspace-experimental/skills: expected only organize-workspace");
+  }
+
+  return errors;
+}
+
 function main() {
   const skillsDir = "skills";
   let errors = [];
-  let count = 0;
+  const skillNames = [];
   try {
     const entries = readdirSync(skillsDir);
     for (const entry of entries) {
@@ -69,13 +171,15 @@ function main() {
       if (!statSync(full).isDirectory()) {
         continue;
       }
-      count += 1;
+      skillNames.push(entry);
       errors = errors.concat(validateSkill(full, entry));
     }
   } catch (error) {
     console.error(`Error reading skills/: ${error.message}`);
     process.exit(1);
   }
+  skillNames.sort();
+  errors = errors.concat(validateSkillInventory(skillNames));
 
   if (errors.length > 0) {
     for (const error of errors) {
@@ -84,7 +188,7 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`✓ All skills valid (${count} found)`);
+  console.log(`✓ All skills valid (${skillNames.length} found)`);
 }
 
 main();

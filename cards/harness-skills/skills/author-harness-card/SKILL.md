@@ -33,6 +33,8 @@ versions deprecated.
      `drwn card source remove-skill`
    - Add or remove bundled MCP definitions: `drwn card source add-mcp` or
      `drwn card source remove-mcp`
+   - Add or remove bundled hook policies: `drwn card source add-hook` or
+     `drwn card source remove-hook`
    - Update source metadata: `drwn card source set`
    - Capture the current project as a source: `drwn card new --from-project`
    - Publish a source: `drwn card publish`
@@ -92,7 +94,8 @@ versions deprecated.
    5. Run `drwn card source doctor <name> --json`.
 7. For adding a bundled skill:
    1. Resolve whether the skill should come from the local library/repo by
-      name or from an explicit directory with `--from <path>`.
+      name or from an explicit `SKILL.md` file or skill directory with
+      `--from <path>`.
    2. Run `drwn card source add-skill <card> <skill> [--from <path>] --dry-run --json`.
    3. Show the planned copy and manifest change.
    4. On approval, run the same command without `--dry-run`. Use `--replace`
@@ -106,27 +109,44 @@ versions deprecated.
    approve, execute pattern with `drwn card source add-mcp` and
    `drwn card source remove-mcp`. Use `--from <json-file>` for explicit MCP
    definition files and `--replace` only after confirming overwrite intent.
-10. For source metadata, run `drwn card source set <card> ... --dry-run --json`
+10. For adding a hook policy:
+    1. Confirm the hook policy name and intended role.
+    2. Run `drwn card source add-hook <card> <hook> --dry-run --json`.
+    3. Explain that this scaffolds `hooks/<hook>/policy.ts` as an observer by
+       default and declares it in `card.json hooks.include`.
+    4. On approval, run the same command without `--dry-run`.
+    5. After editing policy code, run `drwn card source doctor <card> --json`
+       to validate that the policy module builds.
+11. For removing a hook policy:
+    1. Run `drwn card source remove-hook <card> <hook> --dry-run --json`.
+    2. Show whether files and the manifest entry will be removed.
+    3. On approval, run the same command without `--dry-run`. Use
+       `--keep-files` only when the user wants a manifest-only removal.
+12. For source metadata, run `drwn card source set <card> ... --dry-run --json`
    first, then apply after approval. Supported fields include description,
    version, license, harness min version, stability, last validated version,
    and test status badge. `--last-validated-with` must be strict semver such
    as `0.1.0`; do not include package names or prose in that field.
-11. For `card publish`:
+13. For `card publish`:
     1. Run `drwn card source doctor <name> --json`.
     2. If `ok` is false, summarize the issues and stop before publishing.
     3. Run `drwn card source show <name> --json` and confirm the card name and
        version declared in the source manifest.
-    4. On approval, run `drwn card publish <name>`.
-    5. Verify the published ref with `drwn card validate <name>@<version> --json`.
-    6. Run `drwn card show <name>@<version> --json` and summarize the
+    4. If hooks are declared, tell the user consumers must grant hook consent
+       with `drwn card trust <card> --hooks` before `drwn write` materializes
+       those hooks.
+    5. On approval, run `drwn card publish <name>`.
+    6. Verify the published ref with `drwn card validate <name>@<version> --json`.
+    7. Run `drwn card show <name>@<version> --json` and summarize the
        published name, version, integrity, bundled skill count, and server
-       count.
-12. For `card show`, run `drwn card show <ref> --json`.
-13. For `card diff`, run `drwn card diff <before> <after> --json`.
-14. For `card deprecate`:
+       count. Include any `hookPolicies` in the summary.
+14. For `card show`, run `drwn card show <ref> --json`.
+15. For `card diff`, run `drwn card diff <before> <after> --json`; hook
+    additions and removals are structural changes.
+16. For `card deprecate`:
     1. Confirm the exact version and message.
     2. Run `drwn card deprecate <ref> --message "<reason>"`.
-15. If the user asks to push, fetch, clone, create a GitHub repository, manage
+17. If the user asks to push, fetch, clone, create a GitHub repository, manage
     card remotes, or publish the card to a catalog, complete local publish and
     validation first, then continue with `share-harness-card`. Local publish
     does not require GitHub auth; remote creation, push, and direct catalog
@@ -146,10 +166,12 @@ separate questions sequentially when they can be batched into one prompt.
 3. Confirm auto-generated README draft before writing, or trigger manual entry.
 4. Confirm project capture before `card new --from-project`.
 5. Confirm every non-dry-run source mutation after reviewing the dry-run JSON.
-6. Confirm `--replace`, `--keep-files`, and deprecation message choices.
-7. Confirm publish target and immutable version before `drwn card publish`.
-8. Confirm handoff to `share-harness-card` before remote creation or push.
-9. Confirm deprecation target and message before `drwn card deprecate`.
+6. Confirm hook policy scaffold/removal and any post-scaffold policy editing
+   expectations.
+7. Confirm `--replace`, `--keep-files`, and deprecation message choices.
+8. Confirm publish target and immutable version before `drwn card publish`.
+9. Confirm handoff to `share-harness-card` before remote creation or push.
+10. Confirm deprecation target and message before `drwn card deprecate`.
 
 ## Wraps
 
@@ -161,8 +183,11 @@ separate questions sequentially when they can be batched into one prompt.
 `drwn card source remove-skill`, `drwn card source set --dry-run --json`,
 `drwn card source set`, `drwn card source add-mcp --dry-run --json`,
 `drwn card source add-mcp`, `drwn card source remove-mcp --dry-run --json`,
-`drwn card source remove-mcp`, `drwn card publish`, `drwn card show --json`,
-`drwn card diff --json`, `drwn card validate --json`, `drwn card deprecate`
+`drwn card source remove-mcp`, `drwn card source add-hook --dry-run --json`,
+`drwn card source add-hook`, `drwn card source remove-hook --dry-run --json`,
+`drwn card source remove-hook`, `drwn card publish`,
+`drwn card show --json`, `drwn card diff --json`,
+`drwn card validate --json`, `drwn card deprecate`
 
 ## Scope
 
@@ -186,6 +211,8 @@ push, fetch, clone, and catalog publication belong to `share-harness-card`.
   verbatim.
 - Duplicate bundled skill or MCP server: rerun with `--replace` only after the
   user confirms overwrite intent.
+- Invalid hook policy module: surface `card source doctor` issues and repair
+  `hooks/<name>/policy.ts` before publishing.
 - Invalid `lastValidatedWith`: rerun `drwn card source set` with a strict semver
   value such as `0.1.0`.
 - User asks to push, publish to a catalog, or create a GitHub repository: finish

@@ -1,9 +1,9 @@
 # Darwinian Harness Skills
 
 Agent skills wrapping the `drwn` CLI for Claude Code, Codex, Cursor, and other
-agentic environments. This repo ships twelve current-lane skills for project
+agentic environments. This repo ships fourteen current-lane skills for project
 bootstrap, cloned-project install, downstream materialization, cards, library,
-defaults, diagnostics, support, repair, and recommendations, plus one
+defaults, diagnostics, support, repair, source sync, MCP import, and recommendations, plus one
 future-lane stub for workspace organization.
 
 Distributed via Claude Code plugin marketplace, Codex plugin / skill install
@@ -17,6 +17,7 @@ flow.
 | `bootstrap-project` | Initialize a per-repo harness, enable extensions, apply starter cards | project | medium |
 | `apply-harness-card` | Apply, pin, update, remove, detach, inspect Harness Cards | project | medium |
 | `author-harness-card` | Create, publish, diff, deprecate reusable cards | card source | medium |
+| `sync-card-skills` | Refresh a card source's bundled skills from their canonical sources before re-publish | card source | medium |
 | `install-harness-project` | Bootstrap a cloned project from locked cards | project + store | medium |
 | `inspect-harness` | Read-only inspection of state and provenance | project | none |
 | `materialize-harness` | Activate project skills/MCPs and write effective downstream state | project or machine | medium |
@@ -35,7 +36,7 @@ checkpoints before consequential writes.
 
 This repo also ships real card sources under [cards](./cards):
 
-- `@darwinian/harness-skills`: stable card for the 12 current-lane skills
+- `@darwinian/harness-skills`: stable card for the 14 current-lane skills
 - `@darwinian/workspace-experimental`: explicit experimental card for the
   `organize-workspace` stub
 
