@@ -1,6 +1,6 @@
 {
   "name": "@darwinian/harness-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Stable Darwinian Harness card bundling the current-lane user workflow skills."
+  "description": "Compatibility Darwinian Minds tools card bundling primary workflow skills plus legacy aliases."
 }

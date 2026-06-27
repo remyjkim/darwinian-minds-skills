@@ -1,13 +1,13 @@
 ---
 name: materialize-harness
-description: "Use when activating project-local skills or MCP servers, or writing effective Darwinian Harness state into downstream agent tools."
+description: "Use when activating project-local skills or MCP servers, or writing effective Darwinian Minds state into downstream agent tools."
 ---
 
 # materialize-harness
 
 ## Purpose
 
-Materialize effective Darwinian Harness state into downstream agent tools. Use
+Materialize effective Darwinian Minds state into downstream agent tools. Use
 this for routine `drwn write` work, targeted writes, MCP-only writes,
 skills-only writes, and project-local activation of individual skills or MCP
 servers before writing. Use `--root` or `--user` when the requested write is
@@ -35,6 +35,7 @@ machine-level downstream directories.
    - Write only MCP: `drwn write --mcp-only` or `drwn mcp write`
    - Write machine defaults to user-scope config: `drwn write --root`
    - Fail when card hooks lack consent: `drwn write --strict-hooks`
+   - Inspect active mind projection: `drwn mind list --json`
 5. For project-local skill activation:
    1. Preview with `drwn add skill <query-or-name> --dry-run --json`.
    2. Use `--library` if the user wants local inventory only.
@@ -61,6 +62,10 @@ machine-level downstream directories.
    project-scope or machine-scope, and any `optionalMcpReport` entries.
    Optional card MCP definitions require a separate project opt-in with
    `drwn add mcp <name>` before they are materialized.
+   When minds are installed, explain the output directories:
+   `.agents/drwn/generated/minds/` contains per-installed-mind bundles and
+   `.agents/drwn/generated/mind/` contains the composed active-stack view.
+   Redirect active stack changes to `manage-active-mind-stack`.
 9. If the dry run has no changes, say that generated state is already current
    and do not run a real write.
 10. On approval, run the corresponding real write command without `--dry-run`.
@@ -84,6 +89,7 @@ machine-level downstream directories.
 `drwn --version`, `drwn status --json`, `drwn doctor --json`,
 `drwn add skill --dry-run --json`, `drwn add skill`,
 `drwn add mcp --dry-run --json`, `drwn add mcp`,
+`drwn mind list --json`,
 `drwn write --dry-run --json`, `drwn write`,
 `drwn write --root --dry-run --json`, `drwn write --root`,
 `drwn write --user --dry-run --json`, `drwn write --user`,
@@ -108,9 +114,11 @@ project.
   writing.
 - Card hook consent missing or out of range: default writes skip hooks with a
   warning; `--strict-hooks` fails and should be resolved with
-  `apply-harness-card` before writing.
+  `apply-mind-card` before writing.
 - Optional card MCP definitions skipped: explain the required
   `drwn add mcp <name>` opt-in, then rerun the write preview if activated.
+- Active mind stack mismatch: do not run `mind use` from this skill; redirect
+  to `manage-active-mind-stack`.
 - User-owned drift blocks write: explain the conflict and require separate
   approval before `--force`.
 
@@ -121,3 +129,4 @@ project.
 - `inspect-harness`
 - `repair-harness`
 - `recommend-harness`
+- `manage-active-mind-stack`

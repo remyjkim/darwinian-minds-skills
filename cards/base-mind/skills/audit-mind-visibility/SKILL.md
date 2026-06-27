@@ -42,34 +42,38 @@ Invocation forms:
    - If any section is `private`, strictest is `private`.
    - The push gate uses the strictest, not section-by-section.
 4. **If a remote is configured** for the card (`drwn card remote list <card>`):
-   - Classify the remote:
-     - `file://` → `private` (local-only).
-     - Known orgs the user trusts (per machine config) → `internal`.
-     - Other network hosts (github.com, gitlab.com on unknown owners,
-       arbitrary hosts) → `public` (assume the worst).
-   - Compare strictest visibility to remote classification:
+   - Classify only what the CLI can know:
+     - Local paths and `file://` URLs -> `private`.
+     - Network remotes -> `unknown` unless the user supplies
+       `--remote-visibility private|internal|public|unknown`.
+   - Do not infer trusted organizations from the host or owner. The CLI's push
+     gate requires explicit user classification for network remotes.
+   - Compare strictest visibility to the explicit remote classification:
      - `private` content + `private` remote → push OK.
-     - `private` content + `internal`/`public` remote → push BLOCKED.
+     - `private` content + `internal`/`public`/`unknown` remote → push BLOCKED.
      - `internal` content + `private`/`internal` remote → push OK.
-     - `internal` content + `public` remote → push BLOCKED.
-     - `public` content + any remote → push OK.
+     - `internal` content + `public`/`unknown` remote → push BLOCKED.
+     - `public` content + `private`/`internal`/`public` remote → push OK.
+     - `public` content + `unknown` remote → ask for classification before
+       push so the command records intent.
 5. **Report a table** to the user:
 
    ```text
    card                        strictest    remote                      push verdict
    --------------------------- ------------ --------------------------- ------------
-   @darwinian/base-mind        public       git@github.com:darwinian/.. OK
-   @scope/private-notes        private      git@github.com:scope/..     BLOCKED
+   @darwinian/base-mind        public       git@github.com:darwinian/.. needs classification
+   @scope/private-notes        private      git@github.com:scope/..     BLOCKED unknown
    @scope/team-card            internal     (not configured)            n/a
-   @darwinian/harness-skills   (none)       git@github.com:darwinian/.. OK (tools-only)
+   @darwinian/mind-skills      (none)       git@github.com:darwinian/.. OK tools-only
    ```
 
 6. **For BLOCKED cards**, surface the exact override flags:
    - `drwn card push <card> --remote-visibility <v>` to declare the remote
      as that visibility level (use only if the user really controls the
      remote's classification).
-   - `--unsafe-push-public` to override and push anyway (the safety net
-     exists for a reason; warn before suggesting).
+   - `drwn card push <card> --remote-visibility public --unsafe-push-public`
+     only after the user explicitly accepts pushing stricter content to a less
+     restrictive public remote.
 7. **No mutations** — this skill is read-only.
 
 ## Output
@@ -84,8 +88,8 @@ A read-only audit report. No file changes, no pushes, no commits.
   suggest `drwn card new`.
 - **Manifest read fails**: surface the error per card; continue with
   others.
-- **Remote classification ambiguous**: default to the worst case
-  (treat as `public`) and surface the assumption.
+- **Remote classification ambiguous**: report `unknown`, not `public`, and
+  require the user to choose `--remote-visibility` before push.
 
 ## Wraps
 

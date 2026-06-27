@@ -1,6 +1,6 @@
 ---
 name: manage-defaults
-description: "Use when managing machine-wide Darwinian Harness defaults or the curated publication layer for all projects on this machine."
+description: "Use when managing machine-wide Darwinian Minds defaults or the curated publication layer for all projects on this machine."
 ---
 
 # manage-defaults

@@ -1,0 +1,27 @@
+{
+  "name": "@darwinian/mind-skills",
+  "version": "0.1.0",
+  "description": "Primary Darwinian Minds tools card bundling current-lane project setup, install, materialization, Mind Cards, library, defaults, diagnostics, support, repair, recommendation, source-sync, MCP-import, and mind-stack skills.",
+  "skills": {
+    "include": [
+      "bootstrap-project",
+      "apply-mind-card",
+      "author-mind-card",
+      "install-harness-project",
+      "inspect-harness",
+      "materialize-harness",
+      "manage-harness-library",
+      "repair-harness",
+      "manage-defaults",
+      "recommend-harness",
+      "share-mind-card",
+      "support-harness",
+      "sync-card-skills",
+      "import-mcp-from-claude",
+      "manage-active-mind-stack",
+      "author-mind-content",
+      "audit-mind-visibility"
+    ]
+  },
+  "servers": {}
+}

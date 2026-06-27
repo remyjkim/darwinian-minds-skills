@@ -1,6 +1,6 @@
 ---
 name: inspect-harness
-description: "Use when inspecting Darwinian Harness state, provenance, or drift without mutating anything, including explaining why a skill, MCP server, extension, or card is active."
+description: "Use when inspecting Darwinian Minds state, provenance, or drift without mutating anything, including explaining why a skill, MCP server, extension, or card is active."
 ---
 
 # inspect-harness
@@ -22,16 +22,24 @@ Requires `drwn` on PATH. Scope is project, read-only. Blast radius is none.
 3. If the user asks for a full explanation, run `drwn status --explain`.
 4. Run `drwn doctor --json` to surface drift, stale state, or broken symlinks.
 5. Run `drwn card status --explain` to surface card-level provenance.
-6. Run `drwn store status --json` to surface store health and legacy-layout
+6. Run `drwn mind list --json` when the user asks about minds, active stack
+   behavior, or why a Mind Card is or is not projected.
+7. Inspect generated mind artifacts when relevant:
+   `.agents/drwn/generated/minds.json`, per-mind
+   `.agents/drwn/generated/minds/<scope>/<name>/mind.json`, and composed
+   `.agents/drwn/generated/mind/mind.json`.
+   Explain that absent `activeMinds` means all installed cards are active,
+   while explicit `activeMinds: []` means no composed mind should exist.
+8. Run `drwn store status --json` to surface store health and legacy-layout
    detection.
-7. If the user named a published card, run `drwn card show <ref> --json` and
+9. If the user named a published card, run `drwn card show <ref> --json` and
    summarize bundled skills, MCP servers, and `hookPolicies`.
-8. If the user asks what a write would do, run `drwn write --dry-run --json`
+10. If the user asks what a write would do, run `drwn write --dry-run --json`
    and summarize `changes`, `warnings`, and `optionalMcpReport` without
    writing anything.
-9. If the user mentioned an extension, run `drwn extensions status <name> --json`
+11. If the user mentioned an extension, run `drwn extensions status <name> --json`
    and `drwn extensions doctor <name> --json`.
-10. Summarize findings in prose. If a repair is needed, direct the user to
+12. Summarize findings in prose. If a repair is needed, direct the user to
    `repair-harness` rather than fixing anything here.
 
 ## User-Ask Points
@@ -44,7 +52,8 @@ If the user asks to fix something, stop and redirect to `repair-harness`.
 
 `drwn status --json`, `drwn status --why`, `drwn status --explain`,
 `drwn doctor --json`, `drwn card status --explain`, `drwn store status --json`,
-`drwn card show --json`, `drwn write --dry-run --json`,
+`drwn mind list --json`, `drwn card show --json`,
+`drwn write --dry-run --json`,
 `drwn extensions status --json`, `drwn extensions doctor --json`
 
 ## Scope
@@ -58,12 +67,14 @@ Project and machine inspection only. No mutations.
   current harness.
 - Legacy layout detected: flag it loudly and point to `repair-harness`.
 - Hook or optional MCP warnings in a write dry-run: explain the impact and point
-  to `apply-harness-card` or `materialize-harness`; do not fix them here.
+  to `apply-mind-card` or `materialize-harness`; do not fix them here.
+- `activeMinds: []` with no `.agents/drwn/generated/mind/`: report as expected,
+  not drift.
 
 ## Related Skills
 
 - `repair-harness`
-- `apply-harness-card`
+- `apply-mind-card`
 - `install-harness-project`
 - `materialize-harness`
 - `support-harness`

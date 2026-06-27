@@ -1,6 +1,6 @@
 ---
 name: support-harness
-description: "Use when collecting Darwinian Harness support artifacts, exporting or analyzing session logs, managing analyzer auth, or running low-risk store maintenance checks."
+description: "Use when collecting Darwinian Minds support artifacts, exporting or analyzing session logs, managing analyzer auth, or running low-risk store maintenance checks."
 ---
 
 # support-harness
@@ -32,6 +32,8 @@ storage without changing card content.
    - Sign in or out of the analyzer: `drwn login` or `drwn logout`
    - Upload session logs for analysis: `drwn analyze sessions`
    - Export the local store: `drwn store export --out <path>`
+   - Seed the local store from another store path: `drwn store seed --from <path> [--force]`
+   - Preview or run Git-store migration: `drwn store migrate-to-git --dry-run --json`
    - Run Git garbage collection: `drwn store gc`
 4. For session exports:
    1. Run `drwn export sessions --dry-run`.
@@ -63,12 +65,22 @@ storage without changing card content.
    2. Explain that `drwn store export --out <path>` writes a tar archive of the
       local `~/.agents/drwn` store.
    3. On approval, run `drwn store export --out <path>`.
-9. For `drwn store gc`:
-   1. Explain that it runs Git garbage collection in local card repositories.
-   2. Ask for approval because it mutates local Git storage.
-   3. Run `drwn store gc`.
-   4. Verify with `drwn store verify --json`.
-10. If support checks reveal drift, unresolved config, legacy layout, or
+9. For `drwn store seed`:
+   1. Ask for the source path and whether `--force` is intended.
+   2. Explain that seeding mutates the local `~/.agents/drwn` store.
+   3. On approval, run `drwn store seed --from <path> [--force]`.
+   4. Verify with `drwn store status --json` and `drwn store verify --json`.
+10. For `drwn store migrate-to-git`:
+    1. Run `drwn store migrate-to-git --dry-run --json`.
+    2. Summarize planned conversions and removals.
+    3. Ask for approval before running `drwn store migrate-to-git --json`.
+    4. Verify with `drwn store verify --json`.
+11. For `drwn store gc`:
+    1. Explain that it runs Git garbage collection in local card repositories.
+    2. Ask for approval because it mutates local Git storage.
+    3. Run `drwn store gc`.
+    4. Verify with `drwn store verify --json`.
+12. If support checks reveal drift, unresolved config, legacy layout, or
    integrity problems, stop and redirect to `repair-harness`.
 
 ## User-Ask Points
@@ -77,7 +89,7 @@ storage without changing card content.
 2. Confirm analyzer sign-in, sign-out, and session archive upload.
 3. Confirm `--wait` or `--open` before long polling or opening a browser.
 4. Confirm the explicit store export destination.
-5. Confirm `drwn store gc`.
+5. Confirm store seeding, Git-store migration, and `drwn store gc`.
 
 ## Wraps
 
@@ -86,7 +98,8 @@ storage without changing card content.
 `drwn export sessions`, `drwn whoami --json`, `drwn login`,
 `drwn login --no-browser`, `drwn logout`,
 `drwn analyze sessions --dry-run`, `drwn analyze sessions`,
-`drwn store export --out`, `drwn store gc`
+`drwn store export --out`, `drwn store seed --from`, `drwn store migrate-to-git --dry-run --json`,
+`drwn store migrate-to-git --json`, `drwn store gc`
 
 ## Scope
 

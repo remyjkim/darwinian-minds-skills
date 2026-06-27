@@ -1,7 +1,7 @@
 {
   "name": "@darwinian/base-mind",
   "version": "0.1.0",
-  "description": "BaseMind — a foundational Darwinian mind card with persona, beliefs, and skills for activating, authoring, and auditing minds via drwn. Designed to compose with other Darwinian mind cards; see README for recommended stacks.",
+  "description": "BaseMind - a foundational Darwinian Minds card with persona, beliefs, and skills for activating, authoring, and auditing minds via drwn. Designed to compose with other Mind Cards.",
   "stability": "experimental",
   "skills": {
     "include": [

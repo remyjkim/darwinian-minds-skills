@@ -46,4 +46,4 @@ drwn card apply <scope>/<name>@^1.0.0
 
 ---
 
-See the [Darwinian Tools documentation](https://docs.darwiniantools.com) for more information on drwn harness cards, installation, version pinning, and project configuration.
+See the [Darwinian Tools documentation](https://docs.darwiniantools.com) for more information on drwn Mind Cards, installation, version pinning, and project configuration.

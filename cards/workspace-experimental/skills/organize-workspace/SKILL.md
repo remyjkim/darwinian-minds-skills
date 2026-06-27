@@ -1,6 +1,6 @@
 ---
 name: organize-workspace
-description: "Use when the user asks for cross-project Darwinian Harness organization; this placeholder explains that workspace-level scanning and categorization are not implemented yet."
+description: "Use when the user asks for cross-project Darwinian Minds organization; this placeholder explains that workspace-level scanning and categorization are not implemented yet."
 ---
 
 # organize-workspace
@@ -10,7 +10,7 @@ description: "Use when the user asks for cross-project Darwinian Harness organiz
 
 ## Why This Exists
 
-The broader Darwinian Harness product vision includes a cross-project organizer
+The broader Darwinian Minds product vision includes a cross-project organizer
 that can scan a workspace, categorize repos, and help layer harness defaults
 across multiple projects.
 

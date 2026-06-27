@@ -1,13 +1,13 @@
 ---
 name: sync-card-skills
-description: "Use when a Harness Card source's bundled skills have drifted from their canonical sources elsewhere on disk and need refreshing before re-publish — re-pulls each skill into the card source with drwn card source add-skill --replace, dry-run gated. Use when skills live in a product repo and the card bundles copies."
+description: "Use when a Mind Card source's bundled skills have drifted from their canonical sources elsewhere on disk and need refreshing before re-publish — re-pulls each skill into the card source with drwn card source add-skill --replace, dry-run gated. Use when skills live in a product repo and the card bundles copies."
 ---
 
 # sync-card-skills
 
 ## Purpose
 
-Keep a Harness Card source's bundled skill copies aligned with their canonical
+Keep a Mind Card source's bundled skill copies aligned with their canonical
 sources. Published cards are immutable and bundle skill content as copies taken
 at author time; when the canonical skills change (for example, skills versioned
 inside a product repo), the editable card **source** must be re-synced before
@@ -18,7 +18,7 @@ manual per-skill commands or hand-copied directories.
 Requires `drwn` on PATH. Scope is card source. Blast radius is medium because
 `--replace` overwrites bundled skill content in the mutable source. It never
 touches the immutable published store and never publishes — re-publishing the
-synced source is a separate, approved step via `author-harness-card`.
+synced source is a separate, approved step via `author-mind-card`.
 
 ## Procedure
 
@@ -29,7 +29,7 @@ synced source is a separate, approved step via `author-harness-card`.
 2. Resolve the sync target and the canonical source:
    1. Confirm the fully-qualified card source name `@<scope>/<name>`. Sync
       operates on a card **source**, not a published ref. If the user names a
-      published ref, redirect to `author-harness-card` (sources are mutable;
+      published ref, redirect to `author-mind-card` (sources are mutable;
       published versions are immutable).
    2. Confirm the canonical skills root — the directory whose subdirectories are
       the up-to-date skill sources (for example a product repo's
@@ -39,7 +39,7 @@ synced source is a separate, approved step via `author-harness-card`.
    `bundledSkills`. Build three sets:
    - **To sync** — bundled skills that have a canonical match under the root.
    - **Orphaned bundled** — bundled skills with no canonical match (candidates
-     for `remove-skill`, handled by `author-harness-card`; surface, do not
+     for `remove-skill`, handled by `author-mind-card`; surface, do not
      auto-remove).
    - **Unbundled canonical** — canonical skills not yet in the card (candidates
      for a first-time `add-skill`; surface, do not auto-add unless the user asks).
@@ -56,7 +56,7 @@ synced source is a separate, approved step via `author-harness-card`.
    2. Run `drwn card source show @<scope>/<name> --json` and summarize the
       synced skill count and any remaining orphans.
 8. Remind the user that sync only updates the **mutable source**. To release the
-   refreshed content, continue with `author-harness-card`
+   refreshed content, continue with `author-mind-card`
    (`drwn card source set --version ...` then `drwn card publish`).
 
 ## User-Ask Points
@@ -68,7 +68,7 @@ clickable options. Batch related questions into one prompt.
    any per-skill `--from` overrides) before reading state.
 2. Confirm the batch of `--replace` syncs after reviewing the dry-run table.
 3. Confirm whether to also add unbundled canonical skills, or to leave them out.
-4. Confirm handoff to `author-harness-card` for re-publish, and surface orphaned
+4. Confirm handoff to `author-mind-card` for re-publish, and surface orphaned
    bundled skills for the user to decide on `remove-skill` there.
 
 ## Wraps
@@ -81,12 +81,12 @@ clickable options. Batch related questions into one prompt.
 
 Card source under `~/.agents/drwn/sources/<scope>/<name>/`. Publishing,
 version bumps, deprecation, remotes, and catalog publication belong to
-`author-harness-card` and `share-harness-card`.
+`author-mind-card` and `share-mind-card`.
 
 ## Failure Modes
 
 - Published ref passed instead of a source: published versions are immutable.
-  Redirect to `author-harness-card` to publish a new version from the source.
+  Redirect to `author-mind-card` to publish a new version from the source.
 - Card source not found: surface the `drwn card source show` error verbatim;
   the source must already exist (`drwn card new` first).
 - Canonical path missing for a bundled skill: skip it, report it as an orphan,
@@ -101,6 +101,6 @@ version bumps, deprecation, remotes, and catalog publication belong to
 
 ## Related Skills
 
-- `author-harness-card`
-- `apply-harness-card`
+- `author-mind-card`
+- `apply-mind-card`
 - `materialize-harness`

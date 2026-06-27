@@ -1,12 +1,12 @@
 {
   "name": "@darwinian/harness-skills",
   "version": "0.2.0",
-  "description": "Stable Darwinian Harness card bundling current-lane project setup, install, materialization, cards, library, defaults, diagnostics, support, repair, recommendation, source-sync, and MCP-import skills.",
+  "description": "Compatibility Darwinian Minds tools card bundling primary workflow skills plus legacy harness-card aliases for one release.",
   "skills": {
     "include": [
       "bootstrap-project",
-      "apply-harness-card",
-      "author-harness-card",
+      "apply-mind-card",
+      "author-mind-card",
       "install-harness-project",
       "inspect-harness",
       "materialize-harness",
@@ -14,10 +14,16 @@
       "repair-harness",
       "manage-defaults",
       "recommend-harness",
-      "share-harness-card",
+      "share-mind-card",
       "support-harness",
       "sync-card-skills",
-      "import-mcp-from-claude"
+      "import-mcp-from-claude",
+      "manage-active-mind-stack",
+      "author-mind-content",
+      "audit-mind-visibility",
+      "apply-harness-card",
+      "author-harness-card",
+      "share-harness-card"
     ]
   },
   "servers": {}

@@ -11,6 +11,21 @@
       "path": "skills/bootstrap-project"
     },
     {
+      "name": "apply-mind-card",
+      "scope": "shared",
+      "path": "skills/apply-mind-card"
+    },
+    {
+      "name": "author-mind-card",
+      "scope": "shared",
+      "path": "skills/author-mind-card"
+    },
+    {
+      "name": "share-mind-card",
+      "scope": "shared",
+      "path": "skills/share-mind-card"
+    },
+    {
       "name": "apply-harness-card",
       "scope": "shared",
       "path": "skills/apply-harness-card"
@@ -19,6 +34,11 @@
       "name": "author-harness-card",
       "scope": "shared",
       "path": "skills/author-harness-card"
+    },
+    {
+      "name": "share-harness-card",
+      "scope": "shared",
+      "path": "skills/share-harness-card"
     },
     {
       "name": "install-harness-project",
@@ -54,11 +74,6 @@
       "name": "recommend-harness",
       "scope": "shared",
       "path": "skills/recommend-harness"
-    },
-    {
-      "name": "share-harness-card",
-      "scope": "shared",
-      "path": "skills/share-harness-card"
     },
     {
       "name": "support-harness",
