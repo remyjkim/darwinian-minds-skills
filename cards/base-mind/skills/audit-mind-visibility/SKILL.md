@@ -14,6 +14,7 @@ project, or all card sources authored on this machine. If absent, default
 to "all installed cards in the current project."
 
 Invocation forms:
+
 - `/audit-mind-visibility` — defaults to all installed cards in the
   current project.
 - `/audit-mind-visibility <card-name>` — single card.
@@ -53,7 +54,8 @@ Invocation forms:
      - `internal` content + `public` remote → push BLOCKED.
      - `public` content + any remote → push OK.
 5. **Report a table** to the user:
-   ```
+
+   ```text
    card                        strictest    remote                      push verdict
    --------------------------- ------------ --------------------------- ------------
    @darwinian/base-mind        public       git@github.com:darwinian/.. OK
@@ -61,6 +63,7 @@ Invocation forms:
    @scope/team-card            internal     (not configured)            n/a
    @darwinian/harness-skills   (none)       git@github.com:darwinian/.. OK (tools-only)
    ```
+
 6. **For BLOCKED cards**, surface the exact override flags:
    - `drwn card push <card> --remote-visibility <v>` to declare the remote
      as that visibility level (use only if the user really controls the

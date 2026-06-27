@@ -36,6 +36,7 @@ use vs add), ask before mutating.
    - Show the current active stack (or note the default if absent).
 3. For **list** intent, stop here.
 4. For **use** or **clear** intent, preview the projection diff:
+
    ```bash
    # First, set the proposed stack (drwn mind use mutates project config but
    # does not run drwn write).
@@ -43,6 +44,7 @@ use vs add), ask before mutating.
    # Then preview what would land downstream:
    drwn write --dry-run --json
    ```
+
    - Show the user which skills, MCPs, and hooks would be added/removed
      from `.claude/`, `.codex/`, `.cursor/`.
    - Highlight any tool-name collisions (last layer wins on conflict).

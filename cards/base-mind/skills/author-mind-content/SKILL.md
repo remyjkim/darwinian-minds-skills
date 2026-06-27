@@ -27,9 +27,11 @@ Parse from slash invocation or prose:
 ## Directive
 
 1. **Confirm the card source exists**:
+
    ```bash
    drwn card source show <card> --json
    ```
+
    - If the source doesn't exist, redirect to `drwn card new <card>` first.
 2. **Explain the visibility model** to the user before they pick:
    - `private` — blocked from public push without `--unsafe-push-public`.
@@ -41,6 +43,7 @@ Parse from slash invocation or prose:
 3. **Confirm the scope** (which card, which content type, which entry,
    which visibility — and for memory, which layer + format).
 4. **Preview the scaffold** with `--dry-run`:
+
    ```bash
    # Persona
    drwn card source add-persona <card> <entry> --visibility <v> --dry-run --json
@@ -49,6 +52,7 @@ Parse from slash invocation or prose:
    # Memory
    drwn card source add-memory <card> <entry> --layer <l4|l5|l6> --visibility <v> [--format <md|jsonl|mixed>] --dry-run --json
    ```
+
 5. **On user approval**, run the real command (drop `--dry-run`).
 6. **Help the user fill in the scaffolded content**:
    - Persona: open `persona/<entry>/PERSONA.md`. Brief (60-200 words usually
