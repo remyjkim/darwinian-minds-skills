@@ -1,5 +1,5 @@
 {
-  "name": "darwinian-harness-skills",
+  "name": "darwinian-minds-skills",
   "owner": {
     "name": "Remy Kim"
   },
@@ -17,8 +17,8 @@
       "author": {
         "name": "Remy Kim"
       },
-      "homepage": "https://github.com/remyjkim/darwinian-harness-skills",
-      "repository": "https://github.com/remyjkim/darwinian-harness-skills",
+      "homepage": "https://github.com/remyjkim/darwinian-minds-skills",
+      "repository": "https://github.com/remyjkim/darwinian-minds-skills",
       "license": "MIT",
       "keywords": [
         "drwn",
