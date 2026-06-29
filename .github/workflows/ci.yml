@@ -25,6 +25,9 @@ jobs:
       - name: Check identity metadata
         run: npm run check:identity
 
+      - name: Check for local machine paths
+        run: npm run check:paths
+
       - name: Validate skills
         run: npm run validate:skills
 

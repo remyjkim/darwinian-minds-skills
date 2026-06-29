@@ -23,6 +23,7 @@
   },
   "scripts": {
     "check:identity": "node scripts/check-identity.mjs",
+    "check:paths": "node scripts/check-no-local-paths.mjs",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"!node_modules/**\"",
     "smoke:cli": "node scripts/smoke-cli.mjs",
     "validate:cards": "node scripts/validate-cards.mjs",
