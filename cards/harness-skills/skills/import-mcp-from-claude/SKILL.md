@@ -37,7 +37,7 @@ name        claude transport    in drwn?       action
 ----------- ------------------- -------------- --------------------------
 notion      http                registry       skip add, ask activation
 linear      stdio (npx)         not present    transform + library add
-custom-api  http (with headers) not present    transform + library add (warn: headers won't carry)
+custom-api  http (with headers) not present    transform + library add (headers carry; convert literal secrets to ${VAR})
 ```
 
 Wait for explicit confirmation before proceeding.
@@ -56,7 +56,9 @@ For each server requiring `drwn library add mcp`:
    | `command` | `command` | passthrough for stdio |
    | `args` | `args` | passthrough |
    | `env` | `env` | passthrough |
-   | `headers` | (no equivalent today) | **WARN the user** — drwn doesn't support `headers` yet (analysis 64 Phase 4 gap). If headers are present, ask whether to (a) drop them and import without (auth will break), (b) abort, or (c) keep the server in Claude and skip the import. |
+   | `headers` | `headers` | Passthrough as a string map (drwn ≥ 0.6.0). Per target: Claude keeps `${VAR}` verbatim, Cursor rewrites to `${env:VAR}`, Codex maps `Authorization: Bearer ${VAR}` → `bearer_token_env_var` and literal headers → `http_headers`. A **non-bearer** `${VAR}` header can't be expressed on Codex — drwn warns at write time and omits it (still carries on Claude/Cursor). |
+
+   When a `headers` value holds an inline literal secret (e.g. `Bearer sk-...`), do **not** import it verbatim: prompt for an env var name (e.g. `FAL_KEY`), replace the secret with `${ENV_VAR}`, and record the variable in `notes`. Only the `${ENV_VAR}` reference is ever written to the library or a card.
 
 2. Add drwn-specific fields that Claude doesn't track:
    - `description` (required by drwn): ask the user for a one-line purpose. Suggest a default derived from the name (e.g., `"<name> MCP server (imported from Claude Code)"`).
@@ -148,7 +150,7 @@ Surface the per-tool auth steps to the user — don't assume Claude's auth carri
 - **`claude` not installed or no project active**: stop; user must run from a context where Claude Code is configured.
 - **`claude mcp list` returns empty**: nothing to import. Suggest `claude mcp add ...` first or the direct `drwn library add mcp` route.
 - **Server id collision with built-in registry**: surface and treat as already-in-drwn; offer to activate without library-add.
-- **`headers` present in Claude config**: warn and ask (drop / abort / skip). Do not silently drop.
+- **`headers` present in Claude config**: import them (drwn ≥ 0.6.0). Convert any literal secret to a `${ENV_VAR}` reference before add so it isn't committed. Warn only for a non-bearer `${VAR}` header — Codex can't express it (it still carries on Claude/Cursor).
 - **`drwn write` reports drift after cleanup**: do not auto-force. Walk back to find the un-removed Claude entry. Diagnose with `claude mcp list`.
 - **Per-tool auth missing post-import**: report which tool needs auth and the exact command; do not block the import flow.
 
@@ -160,5 +162,5 @@ Surface the per-tool auth steps to the user — don't assume Claude's auth carri
 
 - The skill never touches OAuth tokens — those live in each tool's own credential store. Re-authenticating via the tool's UI after import is normal.
 - For Codex- or Cursor-originated MCP entries, this skill does **not** cover the inverse direction. To extend, add equivalent discovery steps for `codex mcp list` / Cursor config inspection and adjust the cleanup steps per tool.
-- If a server's Claude entry uses `headers` for bearer-token auth, that workflow currently requires either staying tool-local or waiting for drwn's `RegistryServer.headers` schema extension (tracked as analysis 64 Phase 4). Don't pretend the import succeeded if auth would silently break.
+- Header-based (bearer) auth is supported as of drwn ≥ 0.6.0: Claude/Cursor carry the header; Codex maps `Authorization: Bearer ${VAR}` to `bearer_token_env_var`. Convert a literal token to a `${ENV_VAR}` reference on import so the secret isn't committed.
 - Once a server is in the drwn library, future cards can pick it up with `drwn card source add-mcp <card> <name>` — same pattern as analysis 64 / task 46 use for Notion.

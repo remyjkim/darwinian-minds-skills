@@ -110,6 +110,9 @@ versions deprecated.
    approve, execute pattern with `drwn card source add-mcp` and
    `drwn card source remove-mcp`. Use `--from <json-file>` for explicit MCP
    definition files and `--replace` only after confirming overwrite intent.
+   A hosted HTTP server may include a `headers` map to authenticate (drwn ≥ 0.6.0),
+   e.g. `"headers": { "Authorization": "Bearer ${FAL_KEY}" }` — always reference the
+   secret as `${ENV_VAR}`, never a literal token.
 10. For adding a hook policy:
     1. Confirm the hook policy name and intended role.
     2. Run `drwn card source add-hook <card> <hook> --dry-run --json`.
